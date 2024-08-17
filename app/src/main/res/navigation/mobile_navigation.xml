@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_home">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.wganizo.weather.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/action_homeFragment_to_weatherForecastFragment"
+            app:destination="@id/navigation_weather_forecast" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_weather_forecast"
+        android:name="com.wganizo.weather.ui.forecast.WeatherForecastFragment"
+        android:label="@string/title_forecast"
+        tools:layout="@layout/fragment_weather_forecast">
+
+        <argument
+            android:name="latitude"
+            app:argType="float" />
+        <argument
+            android:name="longitude"
+            app:argType="float" />
+        <argument
+            android:name="place"
+            app:argType="string" />
+    </fragment>
+
+</navigation>
