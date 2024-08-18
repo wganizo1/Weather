@@ -6,15 +6,10 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-// Database constants
 private const val DATABASE_NAME = "preferences.db"
 private const val DATABASE_VERSION = 1
-
-// Table and column names
 private const val TABLE_UNITS = "units"
 private const val COLUMN_METRIC_IMPERIAL = "metric_imperial"
-
-// SQL statement to create the units table
 private const val SQL_CREATE_TABLE_UNITS = """
     CREATE TABLE $TABLE_UNITS (
         $COLUMN_METRIC_IMPERIAL TEXT DEFAULT 'metric'
@@ -27,6 +22,7 @@ class PreferencesDatabaseHelper(context: Context) :
         override fun onCreate(db: SQLiteDatabase) {
                 // Create the units table
                 db.execSQL(SQL_CREATE_TABLE_UNITS)
+                // No need to insert a default row here
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -48,15 +44,20 @@ class PreferencesDatabaseHelper(context: Context) :
                         null
                 )
 
-                var unitPreference = "imperial" // Default value
+                var unitPreference = "metric" // Default value
                 if (cursor.moveToFirst()) {
                         unitPreference = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_METRIC_IMPERIAL))
+                } else {
+                        // Insert default row if table is empty
+                        val values = ContentValues().apply {
+                                put(COLUMN_METRIC_IMPERIAL, unitPreference)
+                        }
+                        db.insert(TABLE_UNITS, null, values)
                 }
                 cursor.close()
                 return unitPreference
         }
 
-        // Function to update the value of COLUMN_METRIC_IMPERIAL
         fun updateUnitPreference(newUnit: String): Int {
                 val db = this.writableDatabase
                 val values = ContentValues().apply {

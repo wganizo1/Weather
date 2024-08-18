@@ -14,7 +14,6 @@ class WeatherRepository(context: Context) {
 
     private val dbHelper = PreferencesDatabaseHelper(context)
     private val currentUnit = dbHelper.getUnitPreference()
-    val rowsAffected = dbHelper.updateUnitPreference("imperial")
 
     init {
         val retrofit = Retrofit.Builder()

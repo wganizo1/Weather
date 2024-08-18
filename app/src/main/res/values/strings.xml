@@ -4,4 +4,7 @@
     <string name="title_forecast">Forecast</string>
     <string name="title_notifications">Notifications</string>
     <string name="view_more">View More</string>
+    <string name="preferences">Preferences</string>
+    <string name="metric_selected">Metric selected</string>
+    <string name="imperial_selected">Imperial selected</string>
 </resources>
