@@ -24,6 +24,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.wganizo.weather.R
 import com.wganizo.weather.databinding.FragmentHomeBinding
+import com.wganizo.weather.sqlite.PreferencesDatabaseHelper
 import com.wganizo.weather.utils.LocationUtils
 
 class HomeFragment : Fragment(), OnMapReadyCallback {
@@ -36,6 +37,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private var lat: Double? = null
     private var lon: Double? = null
     private var cityName: String? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -96,7 +98,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
+        val dbHelper = PreferencesDatabaseHelper(requireContext())
+        val unitSign = dbHelper.getUnitSign()
         // Custom InfoWindowAdapter to display the weather details
         mMap.setInfoWindowAdapter(object : GoogleMap.InfoWindowAdapter {
             private val infoWindow: View = layoutInflater.inflate(R.layout.custom_info_window, null)
@@ -126,7 +129,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 val marker = mMap.addMarker(
                     MarkerOptions().position(currentLocation)
                         .title("Weather in $cityName")
-                        .snippet("Temperature: ${weather.temp}°\nHumidity: ${weather.humidity}%")
+                        .snippet("Temperature: ${weather.temp}$unitSign\nHumidity: ${weather.humidity}%")
                 )
                 marker?.showInfoWindow() // Show the info window immediately
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 10f))
@@ -143,7 +146,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 val city = locationUtils.getCityName(latLng.latitude, latLng.longitude)
                 cityName = city
                 marker?.title = "Weather in $city"
-                marker?.snippet = "Temperature: ${weather.temp}°\nHumidity: ${weather.humidity}%"
+
+                marker?.snippet = "Temperature: ${weather.temp}$unitSign\nHumidity: ${weather.humidity}%"
                 marker?.showInfoWindow()
             }
 

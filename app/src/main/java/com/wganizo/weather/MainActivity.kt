@@ -41,13 +41,19 @@ class MainActivity : AppCompatActivity() {
                     showUnitSelectionDialog()
                     true
                 }
+                R.id.navigation_home -> {
+                    val intent = Intent(this, MainActivity::class.java)
+                    finish()
+                    startActivity(intent)
+                    true
+                }
                 else -> false
             }
         }
     }
 
     private fun showUnitSelectionDialog() {
-        val options = arrayOf("Metric", "Imperial")
+        val options = arrayOf("Metric (°C)", "Imperial (°F)")
 
         val dbHelper = PreferencesDatabaseHelper(applicationContext)
         AlertDialog.Builder(this)
@@ -56,12 +62,12 @@ class MainActivity : AppCompatActivity() {
                 when (which) {
                     0 -> {
                         Toast.makeText(this, getString(R.string.metric_selected), Toast.LENGTH_SHORT).show()
-                        dbHelper.updateUnitPreference("metric")
+                        dbHelper.updateUnitPreferences("metric", "°C")
                     }
                     1 -> {
                         Toast.makeText(this,
                             getString(R.string.imperial_selected), Toast.LENGTH_SHORT).show()
-                        dbHelper.updateUnitPreference("imperial")
+                        dbHelper.updateUnitPreferences("imperial", "°F")
                     }
                 }
                 val intent = Intent(this, MainActivity::class.java)

@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.wganizo.weather.R
 import com.wganizo.weather.constants.Constants
+import com.wganizo.weather.sqlite.PreferencesDatabaseHelper
 import kotlinx.coroutines.launch
 
 class WeatherForecastFragment : Fragment() {
@@ -102,12 +103,13 @@ class WeatherForecastFragment : Fragment() {
         Glide.with(requireContext())
             .load("${constants.baseImageUrl}${weather.icon}${constants.fileFormat}")
             .into(weatherImageView)
-
+        val dbHelper = PreferencesDatabaseHelper(requireContext())
+        val unitSign = dbHelper.getUnitSign()
         // Set text for TextViews
         dateTextView.text = weather.date
         placeTextView.text = place
-        averageTempTextView.text = "${String.format("%.2f", weather.temp)}°"
-        tempTextView.text = "Maximum Temperature: ${weather.tempMax}°\nMinimum Temperature: ${weather.tempMin}°"
+        averageTempTextView.text = "${String.format("%.2f", weather.temp)}$unitSign"
+        tempTextView.text = "Maximum Temperature: ${weather.tempMax}$unitSign\nMinimum Temperature: ${weather.tempMin}$unitSign"
         descriptionTextView.text = description
 
         val dialog = builder.create()

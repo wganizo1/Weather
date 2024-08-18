@@ -10,12 +10,14 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.wganizo.weather.R
 import com.wganizo.weather.constants.Constants
+import com.wganizo.weather.sqlite.PreferencesDatabaseHelper
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class WeatherForecastAdapter(private val context: Context, private val weatherList: List<Weather>) : BaseAdapter() {
-
+    private val dbHelper = PreferencesDatabaseHelper(context)
+    private val unitSign = dbHelper.getUnitSign()
     override fun getCount(): Int = weatherList.size
 
     override fun getItem(position: Int): Any = weatherList[position]
@@ -40,7 +42,7 @@ class WeatherForecastAdapter(private val context: Context, private val weatherLi
         val weather = weatherList[position]
         holder.dayTextView.text = dateToDay(weather.date)
         holder.tempTextView.text =
-            "Max: ${weather.tempMax}°\nMin: ${weather.tempMin}°\nAvg: ${weather.temp}°"
+            "Max: ${weather.tempMax}$unitSign\nMin: ${weather.tempMin}$unitSign\nAvg: ${weather.temp}$unitSign"
         holder.descriptionTextView.text = weather.description
         println("${constants.baseImageUrl}${weather.icon}${constants.fileFormat}")
         Glide.with(context)
