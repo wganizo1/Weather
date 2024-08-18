@@ -1,7 +1,6 @@
 package com.wganizo.weather.ui.home
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
@@ -10,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -25,9 +23,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.wganizo.weather.R
-import com.wganizo.weather.constants.Constants
 import com.wganizo.weather.databinding.FragmentHomeBinding
-import com.wganizo.weather.ui.forecast.WeatherForecastFragment
 import com.wganizo.weather.utils.LocationUtils
 
 class HomeFragment : Fragment(), OnMapReadyCallback {
@@ -46,7 +42,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+        // Using the factory to instantiate HomeViewModel
+        val factory = HomeViewModelFactory(requireContext())
+        homeViewModel = ViewModelProvider(this, factory).get(HomeViewModel::class.java)
+
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -54,13 +53,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         locationUtils = LocationUtils(requireContext(), locationManager, LocationServices.getFusedLocationProviderClient(requireContext()))
 
         // Initialize map
-        val mapFragment = childFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment?
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
 
         // Observe the weather data from ViewModel
         homeViewModel.weatherText.observe(viewLifecycleOwner) { weatherInfo ->
-            //binding.textHome.text = weatherInfo
+           // binding.textHome.text = weatherInfo
         }
 
         return root
@@ -87,7 +85,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             location?.let {
                 lat = location.latitude
                 lon = location.longitude
-                // cityName = locationUtils.getCityName(lat!!, lon!!)
                 val currentLocation = LatLng(lat!!, lon!!)
                 onLocationRetrieved(currentLocation)
             }
@@ -128,7 +125,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 cityName = city
                 val marker = mMap.addMarker(
                     MarkerOptions().position(currentLocation)
-
                         .title("Weather in $cityName")
                         .snippet("Temperature: ${weather.temp}°\nHumidity: ${weather.humidity}%")
                 )
@@ -163,7 +159,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             }
             findNavController().navigate(R.id.navigation_weather_forecast, bundle)
         }
-
     }
 
     override fun onDestroyView() {

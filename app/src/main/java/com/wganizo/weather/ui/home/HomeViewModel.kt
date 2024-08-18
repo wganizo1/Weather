@@ -6,9 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
-
-    private val weatherRepository = WeatherRepository()
+class HomeViewModel(private val weatherRepository: WeatherRepository) : ViewModel() {
 
     private val _weatherText = MutableLiveData<String>().apply {
         value = "Weather information will appear here."

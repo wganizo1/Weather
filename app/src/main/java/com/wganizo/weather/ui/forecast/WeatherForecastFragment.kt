@@ -18,10 +18,17 @@ import kotlinx.coroutines.launch
 class WeatherForecastFragment : Fragment() {
 
     private lateinit var forecastListView: ListView
-    private val weatherForecastRepository = WeatherForecastRepository()
-    private val constants = Constants()
+    private lateinit var weatherForecastRepository: WeatherForecastRepository
+    private lateinit var constants: Constants
     private var place: String? = null
     private var description: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Initialize your repository and constants here, not using context directly
+        weatherForecastRepository = WeatherForecastRepository(requireContext())
+        constants = Constants()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,9 +36,7 @@ class WeatherForecastFragment : Fragment() {
     ): View? {
         val rootView = inflater.inflate(R.layout.fragment_weather_forecast, container, false)
         forecastListView = rootView.findViewById(R.id.forecastListView)
-
         fetchWeatherData()
-
         return rootView
     }
 
@@ -39,33 +44,43 @@ class WeatherForecastFragment : Fragment() {
         val latitude = arguments?.getFloat("latitude") ?: 0f
         val longitude = arguments?.getFloat("longitude") ?: 0f
         place = arguments?.getString("place")
+
         lifecycleScope.launch {
-            val weatherResponse = weatherForecastRepository.getWeather(latitude.toDouble(), longitude.toDouble())
-            if (weatherResponse != null) {
-                val groupedWeatherList = weatherResponse.list.groupBy { it.dt_txt.split(" ")[0] }.map { (date, weatherItems) ->
-                    val tempMax = weatherItems.maxOf { it.main.temp }
-                    val tempMin = weatherItems.minOf { it.main.temp }
-                    val avgTemp = String.format("%.2f", weatherItems.map { it.main.temp }.average()).toDouble()
-                    description = weatherItems.first().weather.firstOrNull()?.description ?: ""
-                    val icon = weatherItems.first().weather.firstOrNull()?.icon ?: ""
+            try {
+                val weatherResponse = weatherForecastRepository.getWeather(latitude.toDouble(), longitude.toDouble())
+                if (weatherResponse != null) {
+                    val groupedWeatherList = weatherResponse.list.groupBy { it.dt_txt.split(" ")[0] }.map { (date, weatherItems) ->
+                        val tempMax = weatherItems.maxOf { it.main.temp }
+                        val tempMin = weatherItems.minOf { it.main.temp }
+                        val avgTemp = String.format("%.2f", weatherItems.map { it.main.temp }.average()).toDouble()
+                        description = weatherItems.first().weather.firstOrNull()?.description ?: ""
+                        val icon = weatherItems.first().weather.firstOrNull()?.icon ?: ""
 
-                    Weather(
-                        date = date,
-                        tempMax = tempMax,
-                        tempMin = tempMin,
-                        temp = avgTemp,
-                        description = "$description in $place",
-                        icon = icon
-                    )
-                }
-                val adapter = WeatherForecastAdapter(requireContext(), groupedWeatherList)
-                forecastListView.adapter = adapter
+                        Weather(
+                            date = date,
+                            tempMax = tempMax,
+                            tempMin = tempMin,
+                            temp = avgTemp,
+                            description = "$description in $place",
+                            icon = icon
+                        )
+                    }
+                    val adapter = WeatherForecastAdapter(requireContext(), groupedWeatherList)
+                    forecastListView.adapter = adapter
 
-                // Set item click listener
-                forecastListView.setOnItemClickListener { _, _, position, _ ->
-                    val selectedWeather = groupedWeatherList[position]
-                    showWeatherDetailsDialog(selectedWeather)
+                    // Set item click listener
+                    forecastListView.setOnItemClickListener { _, _, position, _ ->
+                        val selectedWeather = groupedWeatherList[position]
+                        showWeatherDetailsDialog(selectedWeather)
+                    }
+                } else {
+                    // Handle the case where weatherResponse is null
+                    // Show a message to the user or handle the error accordingly
                 }
+            } catch (e: Exception) {
+                // Handle any exceptions
+                e.printStackTrace()
+                // Show an error message to the user
             }
         }
     }
@@ -92,7 +107,7 @@ class WeatherForecastFragment : Fragment() {
         dateTextView.text = weather.date
         placeTextView.text = place
         averageTempTextView.text = "${String.format("%.2f", weather.temp)}°"
-        tempTextView.text = "Maximum Temperature: ${weather.tempMax}°\nMinimum Temperature : ${weather.tempMin}°"
+        tempTextView.text = "Maximum Temperature: ${weather.tempMax}°\nMinimum Temperature: ${weather.tempMin}°"
         descriptionTextView.text = description
 
         val dialog = builder.create()
@@ -104,5 +119,4 @@ class WeatherForecastFragment : Fragment() {
         }
         dialog.show()
     }
-
 }
